@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 from recipes.models import *
+from users.models import *
 
 
 class RecipeSerializer(serializers.ModelSerializer):
