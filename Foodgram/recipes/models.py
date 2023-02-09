@@ -85,9 +85,6 @@ class Ingredient(models.Model):
         max_length=200,
         verbose_name='Название ингридиента',
     )
-    quantity = models.IntegerField(
-        verbose_name='Колличество',
-    )
     unit = models.IntegerField(
         verbose_name='Единица измерения',
     )
@@ -105,11 +102,13 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         'Recipe',
         on_delete=models.CASCADE,
+        related_name='ingredient_of_recipe',
         verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(
         'Ingredient',
         on_delete=models.CASCADE,
+        related_name='ingredient_of_recipe',
         verbose_name='Ингредиент'
     )
     quantity = models.IntegerField(
