@@ -16,7 +16,7 @@ from recipes.models import (Recipe,
 from users.models import Subscription, User
 
 
-class UserCreateSerializer(UserCreateSerializer):
+class OwnUserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
         fields = ['email', 
@@ -27,7 +27,7 @@ class UserCreateSerializer(UserCreateSerializer):
                   'password']
 
 
-class UserSerializer(UserSerializer):
+class OwnUserSerializer(UserSerializer):
     is_subscribed = SerializerMethodField()
 
     class Meta:
@@ -81,7 +81,7 @@ class Recipeingredienterializer(ModelSerializer):
 
 class RecipeSerializer(ModelSerializer):
     tag = TagSerializer(read_only=True, many=True)
-    author = UserSerializer(read_only=True)
+    author = OwnUserSerializer(read_only=True)
     ingredient = Recipeingredienterializer(
         source='ingredient_of_recipe',
         read_only=True,
@@ -128,7 +128,7 @@ class PostIngredientRecipeSerializer(ModelSerializer):
 
 
 class CreateRecipeSerializer(ModelSerializer):
-    author = UserSerializer(read_only=True)
+    author = OwnUserSerializer(read_only=True)
     ingredient = PostIngredientRecipeSerializer(many=True)
     tag = PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
