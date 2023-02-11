@@ -3,18 +3,29 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
+from recipes.models import (Recipe,
+                            Tag,
+                            Ingredient,
+                            Favorite,
+                            Shoppinglist,
+                            RecipeIngredient)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.pagination import LimitOffsetPagination
-from .permissions import IsAuthor, IsReadOnly
+from users.models import User, Subscription
 
-from recipes.models import *
-from users.models import *
-from .serializers import *
+from .permissions import IsAuthor, IsReadOnly
+from .serializers import (OwnUserSerializer,
+                          TagSerializer,
+                          IngredientSerializer,
+                          RecipeSerializer,
+                          CreateRecipeSerializer,
+                          RecipeSmallSerializer,
+                          SubscriptionSerializer)
 
 
 class OwnUserViewSet(UserViewSet):
@@ -31,17 +42,21 @@ class OwnUserViewSet(UserViewSet):
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
-        if user == author:
-            return Response(
-                {'Нельзя подписаться на себя!'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        Subscription.objects.create(
+            user=user,
+            author=author
+        )
+        serializer = SubscriptionSerializer(
+            author,
+            context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    search_fields = ['name',]
+    search_fields = ['name']
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -82,6 +97,25 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
         return self.perform(request, pk, Shoppinglist)
+
+    @action(detail=False, methods=['get'],
+            permission_classes=[IsAuthenticated])
+    def download_shopping_cart(self, request):
+        ingredients = RecipeIngredient.objects.filter(
+            recipe__shoppinglist__user=request.user
+        ).values(
+            'ingredient__title',
+            'ingredient__unit'
+        ).annotate(total_=Sum('quantity'))
+        shopping_list = ['{} ({}) - {}\n'.format(
+            ingredient['ingredient__title'],
+            ingredient['ingredient__unit'],
+            ingredient['total_']
+        ) for ingredient in ingredients]
+        response = HttpResponse(shopping_list, content_type='text/plain')
+        attachment = 'attachment; filename="shopping_list.txt"'
+        response['Content-Disposition'] = attachment
+        return response
 
 
 class SubscriptionListView(ListAPIView):

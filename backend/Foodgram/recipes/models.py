@@ -1,21 +1,8 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 from users.models import User
 
 
 class Recipe(models.Model):
-
-    """
-        Автор публикации (пользователь).
-        Название.
-        Картинка.
-        Текстовое описание.
-        Ингредиенты: продукты для приготовления блюда по рецепту. Множественное поле, выбор из предустановленного списка, с указанием количества и единицы измерения.
-        Тег (можно установить несколько тегов на один рецепт, выбор из предустановленных).
-        Время приготовления в минутах.
-        Все поля обязательны для заполнения.
-    """
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -38,11 +25,11 @@ class Recipe(models.Model):
         'Ingredient',
         through='RecipeIngredient',
         verbose_name='Ингредиенты',
-    )  # Ингредиенты: продукты для приготовления блюда по рецепту. Множественное поле, выбор из предустановленного списка, с указанием количества и единицы измерения.
+    )
     tag = models.ManyToManyField(
         'Tag',
         verbose_name='Тег',
-    )  # Тег (можно установить несколько тегов на один рецепт, выбор из предустановленных).
+    )
     time = models.IntegerField(
         verbose_name='Время приготовления в минутах',
     )
@@ -61,7 +48,7 @@ class Tag(models.Model):
         verbose_name='Название тега',
         unique=True,
     )
-    clolor = models.CharField(
+    color = models.CharField(
         max_length=50,
         verbose_name='цвет',
         unique=True,
@@ -74,10 +61,10 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
-        ordering = ['title',]
+        ordering = ['title']
 
     def __str__(self):
-        return f'{self.name} (цвет: {self.color})'
+        return f'{self.title} (цвет: {self.color})'
 
 
 class Ingredient(models.Model):
@@ -92,10 +79,10 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
-        ordering = ['title',]
+        ordering = ['title']
 
     def __str__(self) -> str:
-        return f'{self.name} {self.measurement_unit}'
+        return f'{self.title} {self.unit}'
 
 
 class RecipeIngredient(models.Model):

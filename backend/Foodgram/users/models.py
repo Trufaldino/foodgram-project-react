@@ -22,13 +22,13 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-    
+
     def __str__(self):
         return self.username
 
 
 class Subscription(models.Model):
-    follower = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='subscribers',
@@ -46,10 +46,10 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
-                fields=['follower', 'author'],
+                fields=['user', 'author'],
                 name='unique_subscribe',
             )
         ]
 
     def __str__(self):
-        return f'{self.follower} {self.author}'
+        return f'{self.user} {self.author}'

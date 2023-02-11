@@ -1,28 +1,20 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework.serializers import (IntegerField, 
-                                        ModelSerializer,
-                                        PrimaryKeyRelatedField,
-                                        ReadOnlyField,
-                                        SerializerMethodField,
-                                        ValidationError)
-
-from recipes.models import (Recipe,
-                            Ingredient,
-                            Tag,
-                            RecipeIngredient,
-                            Favorite, 
-                            Shoppinglist)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            Shoppinglist, Tag)
+from rest_framework.serializers import (IntegerField, ModelSerializer,
+                                        PrimaryKeyRelatedField, ReadOnlyField,
+                                        SerializerMethodField)
 from users.models import Subscription, User
 
 
 class OwnUserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = ['email', 
-                  'id', 
-                  'username', 
-                  'first_name', 
+        fields = ['email',
+                  'id',
+                  'username',
+                  'first_name',
                   'last_name',
                   'password']
 
@@ -32,10 +24,10 @@ class OwnUserSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 
-                  'id', 
-                  'username', 
-                  'first_name', 
+        fields = ['email',
+                  'id',
+                  'username',
+                  'first_name',
                   'last_name',
                   'is_subscribed']
 
@@ -46,14 +38,14 @@ class OwnUserSerializer(UserSerializer):
             author=author.id
         ).exists()
 
-    
+
 class TagSerializer(ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ['id', 
-                  'title', 
-                  'color', 
+        fields = ['id',
+                  'title',
+                  'color',
                   'slug']
 
 
@@ -61,21 +53,21 @@ class IngredientSerializer(ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ['id', 
-                  'name', 
+        fields = ['id',
+                  'title',
                   'unit']
 
 
 class Recipeingredienterializer(ModelSerializer):
     id = ReadOnlyField(source='ingredient.id')
     name = ReadOnlyField(source='ingredient.title')
-    measurement_unit = ReadOnlyField(source='ingredient.unit')
+    unit = ReadOnlyField(source='ingredient.unit')
 
     class Meta:
         model = RecipeIngredient
-        fields = ['id', 
-                  'name', 
-                  'unit', 
+        fields = ['id',
+                  'name',
+                  'unit',
                   'quantity']
 
 
@@ -92,14 +84,14 @@ class RecipeSerializer(ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ['id', 
-                  'tag', 
-                  'author', 
-                  'ingredient', 
+        fields = ['id',
+                  'tag',
+                  'author',
+                  'ingredient',
                   'is_favorited',
-                  'is_in_shopping_cart', 
-                  'title', 
-                  'image', 
+                  'is_in_shopping_cart',
+                  'title',
+                  'image',
                   'description',
                   'time']
 
@@ -116,14 +108,13 @@ class RecipeSerializer(ModelSerializer):
         return Shoppinglist.objects.filter(user=user, recipe=recipe).exists()
 
 
-
 class PostIngredientRecipeSerializer(ModelSerializer):
     id = IntegerField()
-    amount = IntegerField()
+    quantity = IntegerField()
 
     class Meta:
         model = RecipeIngredient
-        fields = ['id', 
+        fields = ['id',
                   'quantity']
 
 
@@ -145,7 +136,7 @@ class CreateRecipeSerializer(ModelSerializer):
             'image',
             'title',
             'description',
-            'time'
+            'time',
         ]
 
     def create_ingredient(self, ingredient, recipe):
@@ -183,15 +174,19 @@ class CreateRecipeSerializer(ModelSerializer):
             'request': self.context.get('request')
         }).data
 
+
 class RecipeSmallSerializer(ModelSerializer):
     image = Base64ImageField()
 
     class Meta:
         model = Recipe
-        fields = ('id', 'title', 'image', 'time')
+        fields = ['id',
+                  'title',
+                  'image',
+                  'time']
 
 
-class SubscriptionSerializer(UserSerializer):
+class SubscriptionSerializer(OwnUserSerializer):
     recipes = SerializerMethodField()
     recipes_count = SerializerMethodField()
 
@@ -210,4 +205,3 @@ class SubscriptionSerializer(UserSerializer):
         )
         if recipes_limit:
             recipes = recipes[:int(recipes_limit)]
-        return RecipeSmallSerializer(recipes, many=True)

@@ -1,15 +1,18 @@
 from django.urls import include, path
-from rest_framework import routers
 from djoser.views import TokenCreateView, TokenDestroyView
+from rest_framework import routers
 
-from .views import *
-
+from .views import (OwnUserViewSet,
+                    RecipeViewSet,
+                    TagViewSet,
+                    IngredientViewSet,
+                    SubscriptionListView)
 
 router_v1 = routers.DefaultRouter()
 router_v1.register(r'users', OwnUserViewSet, basename='users')
 router_v1.register(r'recipes', RecipeViewSet, basename='recipes')
 router_v1.register(r'tags', TagViewSet, basename='tags')
-router_v1.register(r'ingridients', IngredientViewSet, basename='ingridients')
+router_v1.register(r'ingredients', IngredientViewSet, basename='ingridients')
 
 urlpatterns = [
     path(
