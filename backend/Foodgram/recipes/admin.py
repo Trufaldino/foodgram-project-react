@@ -1,14 +1,14 @@
 from django.contrib import admin
 
 from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                     Shoppinglist, Tag)
+                     ShoppingCart, Tag)
 
 
 @admin.register(Recipe)
 class RecipeModelAdmin(admin.ModelAdmin):
-    list_display = ('author', 'id', 'title', 'count_in_favorites')
+    list_display = ('author', 'id', 'name', 'count_in_favorites')
     readonly_fields = ('count_in_favorites',)
-    list_filter = ('author', 'title', 'tag',)
+    list_filter = ('author', 'name', 'tags',)
 
     def count_in_favorites(self, recipe):
         return Favorite.objects.filter(recipe=recipe).count()
@@ -16,16 +16,16 @@ class RecipeModelAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientModelAdmin(admin.ModelAdmin):
-    list_display = ('title', 'unit',)
-    list_filter = ('unit',)
+    list_display = ('name', 'measurement_unit',)
+    list_filter = ('measurement_unit',)
 
 
 @admin.register(Tag)
 class TagModelAdmin(admin.ModelAdmin):
-    list_display = ('title', 'color', 'slug',)
+    list_display = ('name', 'color', 'slug',)
 
 
-@admin.register(Shoppinglist)
+@admin.register(ShoppingCart)
 class ShoppinglsitModelAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe',)
 
@@ -37,4 +37,4 @@ class FavouriteModelAdmin(admin.ModelAdmin):
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientModelAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'ingredient', 'quantity',)
+    list_display = ('recipe', 'ingredient', 'amount',)

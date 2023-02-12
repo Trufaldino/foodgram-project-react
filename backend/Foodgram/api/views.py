@@ -3,12 +3,6 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Recipe,
-                            Tag,
-                            Ingredient,
-                            Favorite,
-                            Shoppinglist,
-                            RecipeIngredient)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
@@ -16,16 +10,16 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from users.models import User, Subscription
+
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
+from users.models import Subscription, User
 
 from .permissions import IsAuthor, IsReadOnly
-from .serializers import (OwnUserSerializer,
-                          TagSerializer,
-                          IngredientSerializer,
-                          RecipeSerializer,
-                          CreateRecipeSerializer,
-                          RecipeSmallSerializer,
-                          SubscriptionSerializer)
+from .serializers import (CreateRecipeSerializer, IngredientSerializer,
+                          OwnUserSerializer, RecipeSerializer,
+                          RecipeSmallSerializer, SubscriptionSerializer,
+                          TagSerializer)
 
 
 class OwnUserViewSet(UserViewSet):
@@ -56,7 +50,8 @@ class OwnUserViewSet(UserViewSet):
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    search_fields = ['name']
+    filter_backends = [DjangoFilterBackend, ]
+    search_fields = ['^name']
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -96,21 +91,21 @@ class RecipeViewSet(ModelViewSet):
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        return self.perform(request, pk, Shoppinglist)
+        return self.perform(request, pk, ShoppingCart)
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         ingredients = RecipeIngredient.objects.filter(
-            recipe__shoppinglist__user=request.user
+            recipe__shopping_cart__user=request.user
         ).values(
-            'ingredient__title',
-            'ingredient__unit'
-        ).annotate(total_=Sum('quantity'))
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(total_amount=Sum('amount'))
         shopping_list = ['{} ({}) - {}\n'.format(
-            ingredient['ingredient__title'],
-            ingredient['ingredient__unit'],
-            ingredient['total_']
+            ingredient['ingredient__name'],
+            ingredient['ingredient__measurement_unit'],
+            ingredient['total_amount']
         ) for ingredient in ingredients]
         response = HttpResponse(shopping_list, content_type='text/plain')
         attachment = 'attachment; filename="shopping_list.txt"'

@@ -16,3 +16,4 @@ pytz==2021.1
 sqlparse==0.4.1
 drf-extra-fields==3.2.1
 django-filter==21.1
+django-colorfield==0.6.3
