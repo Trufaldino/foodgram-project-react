@@ -1,3 +1,10 @@
+сервер - http://51.250.90.134/
+
+администратор:
+username - admin
+password - admin
+email - admin@admin.com 
+
 ## Проект Foodgram
 
 ![workflow](https://github.com/Trufaldino/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
@@ -52,7 +59,7 @@ DB_PORT                 # 5432 (порт по умолчанию)
 
 - Создать и запустить контейнеры Docker, выполнить команду на сервере
 ```
-sudo docker compose up -d
+sudo docker-compose up -d --build
 ```
 
 - После успешной сборки выполнить миграции:
