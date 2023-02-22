@@ -3,7 +3,7 @@ import os
 
 from django.core.management.base import BaseCommand
 
-from foodgram.settings import BASE_DIR
+from Foodgram.settings import BASE_DIR
 from recipes.models import Ingredient
 
 
