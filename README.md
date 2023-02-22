@@ -57,9 +57,14 @@ DB_HOST                 # db
 DB_PORT                 # 5432 (порт по умолчанию)
 ```
 
-- Создать и запустить контейнеры Docker, выполнить команду на сервере
+- Создать и запустить контейнеры Docker, выполнить команду на сервере из директории foodgram-project-react/infra
 ```
 sudo docker-compose up -d --build
+```
+
+- Собрать статику:
+```
+sudo docker compose exec backend python manage.py collectstatic --noinput
 ```
 
 - После успешной сборки выполнить миграции:
@@ -72,14 +77,9 @@ sudo docker compose exec backend python manage.py migrate
 sudo docker compose exec backend python manage.py createsuperuser
 ```
 
-- Собрать статику:
-```
-sudo docker compose exec backend python manage.py collectstatic --noinput
-```
-
 - Наполнить базу данных содержимым из файла ingredients.json:
 ```
-sudo docker compose exec backend python manage.py loaddata ingredients.json
+sudo docker-compose exec backend python manage.py load_csv_data
 ```
 
 - Для остановки контейнеров Docker:

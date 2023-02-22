@@ -14,7 +14,7 @@ from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import Subscription, User
 
-from .pagination import LimitPagination
+from .pagination import LimitedPagination
 from .permissions import IsAuthor, IsReadOnly
 from .serializers import (CreateRecipeSerializer, IngredientSerializer,
                           OwnUserSerializer, RecipeSerializer,
@@ -24,7 +24,7 @@ from .serializers import (CreateRecipeSerializer, IngredientSerializer,
 
 class OwnUserViewSet(UserViewSet):
     serializer_class = OwnUserSerializer
-    pagination_class = LimitPagination
+    pagination_class = LimitedPagination
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
@@ -63,7 +63,7 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = [IsAuthor | IsReadOnly]
-    pagination_class = LimitPagination
+    pagination_class = LimitedPagination
     filter_backends = [DjangoFilterBackend, ]
 
     def get_serializer_class(self):
@@ -116,7 +116,7 @@ class RecipeViewSet(ModelViewSet):
 class SubscriptionListView(ListAPIView):
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = LimitPagination
+    pagination_class = LimitedPagination
 
     def get_queryset(self):
         return User.objects.filter(subscriptions__user=self.request.user)
