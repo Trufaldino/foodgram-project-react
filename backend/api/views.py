@@ -6,7 +6,6 @@ from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -15,6 +14,7 @@ from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import Subscription, User
 
+from .pagination import LimitPagination
 from .permissions import IsAuthor, IsReadOnly
 from .serializers import (CreateRecipeSerializer, IngredientSerializer,
                           OwnUserSerializer, RecipeSerializer,
@@ -24,7 +24,7 @@ from .serializers import (CreateRecipeSerializer, IngredientSerializer,
 
 class OwnUserViewSet(UserViewSet):
     serializer_class = OwnUserSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = LimitPagination
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
@@ -63,7 +63,7 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = [IsAuthor | IsReadOnly]
-    pagination_class = LimitOffsetPagination
+    pagination_class = LimitPagination
     filter_backends = [DjangoFilterBackend, ]
 
     def get_serializer_class(self):
@@ -116,7 +116,7 @@ class RecipeViewSet(ModelViewSet):
 class SubscriptionListView(ListAPIView):
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = LimitOffsetPagination
+    pagination_class = LimitPagination
 
     def get_queryset(self):
         return User.objects.filter(subscriptions__user=self.request.user)
