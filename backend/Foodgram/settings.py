@@ -26,15 +26,9 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY', default='1fv102$_^jkw-^zc5n6&4vg!4571kb#rt&2!8i0+wc-k%e-tr!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = [
-    '51.250.90.134',
-    'localhost',
-    '127.0.0.1',
-    '[::1]',
-    'testserver',
-]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
