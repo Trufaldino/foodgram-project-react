@@ -141,7 +141,7 @@ class CreateRecipeSerializer(ModelSerializer):
         ]
 
     def validate_ingredients(self, data):
-        ingredients = data.get('ingredients')
+        ingredients = data[0].get('ingredients')
         if not ingredients:
             raise ValidationError(
                 'В рецепте должен быть хотя бы один ингредиент'
@@ -158,7 +158,7 @@ class CreateRecipeSerializer(ModelSerializer):
                     {'ingredient': 'Ингредиенты должны быть уникальными'}
                 )
             ingredients_list.append(ingredient['id'])
-        return data
+        return data[0]
 
     def validate_tags(self, tags):
         if not tags:
