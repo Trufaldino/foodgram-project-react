@@ -1,9 +1,13 @@
 сервер - http://51.250.90.134/
-
-администратор:
-username - admin
-password - admin
+```
 email - admin@admin.com 
+password - admin
+```
+админка -http://51.250.90.134/admin/
+
+username - admin 
+password - admin
+
 
 ## Проект Foodgram
 
