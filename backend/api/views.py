@@ -36,6 +36,18 @@ class OwnUserViewSet(UserViewSet):
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
+        if user == author:
+            return Response(
+                {'Нельзя подписаться на самого себя!'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if Subscription.objects.filter(
+                user=user, author=author
+        ).exists():
+            return Response(
+                {'Нельзя подписаться повторно!'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         Subscription.objects.create(
             user=user,
             author=author
@@ -45,6 +57,21 @@ class OwnUserViewSet(UserViewSet):
             context={'request': request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    def delete_subscribe(self, request, id=None):
+        author = get_object_or_404(User, id=id)
+        subscription = Subscription.objects.filter(
+            user=request.user,
+            author=author
+        )
+        if subscription:
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'Попытка удалить несуществующую подписку!'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
