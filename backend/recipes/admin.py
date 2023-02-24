@@ -4,37 +4,27 @@ from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                      ShoppingCart, Tag)
 
 
-@admin.register(Recipe)
-class RecipeModelAdmin(admin.ModelAdmin):
-    list_display = ('author', 'id', 'name', 'count_in_favorites')
-    readonly_fields = ('count_in_favorites',)
-    list_filter = ('author', 'name', 'tags',)
+class IngredientAdmin(admin.ModelAdmin):
+    list_filter = ('name',)
+
+
+class RecipeIngredientInline(admin.TabularInline):
+    model = Recipe.ingredients.through
+    extra = 1
+
+
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'author', 'name', 'count_in_favorites')
+    list_filter = ('author', 'name', 'tags')
+    inlines = (RecipeIngredientInline, )
 
     def count_in_favorites(self, recipe):
         return Favorite.objects.filter(recipe=recipe).count()
 
 
-@admin.register(Ingredient)
-class IngredientModelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'measurement_unit',)
-    list_filter = ('measurement_unit',)
-
-
-@admin.register(Tag)
-class TagModelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'color', 'slug',)
-
-
-@admin.register(ShoppingCart)
-class ShoppinglsitModelAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe',)
-
-
-@admin.register(Favorite)
-class FavouriteModelAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe',)
-
-
-@admin.register(RecipeIngredient)
-class RecipeIngredientModelAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'ingredient', 'amount',)
+admin.site.register(Ingredient, IngredientAdmin)
+admin.site.register(Tag)
+admin.site.register(Recipe, RecipeAdmin)
+admin.site.register(RecipeIngredient)
+admin.site.register(Favorite)
+admin.site.register(ShoppingCart)

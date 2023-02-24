@@ -114,7 +114,7 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 DB_HOST=db
 DB_PORT=5432
-SECRET_KEY='секретный ключ Django'
+DJANGO_SECRET_KEY='секретный ключ Django'
 ```
 
 - Создать и запустить контейнеры Docker, последовательно выполнить команды по созданию миграций, сбору статики, 

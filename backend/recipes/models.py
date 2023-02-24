@@ -1,7 +1,6 @@
 from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
-
 from users.models import User
 
 
@@ -37,12 +36,9 @@ class Recipe(models.Model):
         default=1,
         verbose_name='Время приготовления в минутах'
     )
-    pub_date = models.DateTimeField(
-        auto_now_add=True
-    )
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ['-id']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -59,17 +55,18 @@ class Tag(models.Model):
         max_length=7,
         unique=True,
         verbose_name='Цвет в HEX',
+        default='#E26C2D'
     )
     slug = models.SlugField(
         max_length=200,
         unique=True,
-        verbose_name='Слаг'
+        verbose_name='Slug'
     )
 
     class Meta:
-        verbose_name = 'Тэг'
-        verbose_name_plural = 'Тэги'
         ordering = ['name']
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
 
     def __str__(self):
         return f'{self.name} (цвет: {self.color})'
@@ -178,8 +175,15 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        ordering = ['user', 'recipe']
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_recipe_in_shopping_cart'
+            )
+        ]
 
     def __str__(self):
         return f'{self.user} {self.recipe}'

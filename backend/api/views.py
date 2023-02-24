@@ -10,27 +10,27 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
-from users.models import Subscription, User
-
 from .filters import IngredientSearchFilter, RecipeFilter
-from .pagination import LimitedPagination
+from .pagination import LimitPagination
 from .permissions import IsAuthor, IsReadOnly
-from .serializers import (CreateRecipeSerializer, IngredientSerializer,
-                          OwnUserSerializer, RecipeSerializer,
-                          RecipeSmallSerializer, SubscriptionSerializer,
+from .serializers import (CreateRecipeSerializer, CustomUserSerializer,
+                          IngredientSerializer, RecipeMinifiedSerializer,
+                          RecipeSerializer, SubscriptionSerializer,
                           TagSerializer)
 
+from recipes.models import (Favorite, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCart, Tag)
+from users.models import Subscription, User
 
-class OwnUserViewSet(UserViewSet):
-    serializer_class = OwnUserSerializer
-    pagination_class = LimitedPagination
+
+class CustomUserViewSet(UserViewSet):
+    serializer_class = CustomUserSerializer
+    pagination_class = LimitPagination
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
     def me(self, request, *args, **kwargs):
-        return super(OwnUserViewSet, self).me(request, *args, **kwargs)
+        return super(CustomUserViewSet, self).me(request, *args, **kwargs)
 
     @action(detail=True, methods=['post'],
             permission_classes=[IsAuthenticated])
@@ -79,7 +79,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = [IngredientSearchFilter, ]
-    search_fields = ['^name']
+    search_fields = ('^name',)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -91,21 +91,21 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = [IsAuthor | IsReadOnly]
-    pagination_class = LimitedPagination
-    filter_class = RecipeFilter
+    pagination_class = LimitPagination
     filter_backends = [DjangoFilterBackend, ]
+    filter_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return RecipeSerializer
         return CreateRecipeSerializer
 
-    def perform(self, request, pk, attr):
+    def execution(self, request, pk, attr):
         instance = attr.objects.filter(user=request.user, recipe__id=pk)
         if request.method == 'POST' and not instance.exists():
             recipe = get_object_or_404(Recipe, id=pk)
             attr.objects.create(user=request.user, recipe=recipe)
-            serializer = RecipeSmallSerializer(recipe)
+            serializer = RecipeMinifiedSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE' and instance.exists():
             instance.delete()
@@ -115,12 +115,12 @@ class RecipeViewSet(ModelViewSet):
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        return self.perform(request, pk, Favorite)
+        return self.execution(request, pk, Favorite)
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        return self.perform(request, pk, ShoppingCart)
+        return self.execution(request, pk, ShoppingCart)
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
@@ -145,7 +145,7 @@ class RecipeViewSet(ModelViewSet):
 class SubscriptionListView(ListAPIView):
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = LimitedPagination
+    pagination_class = LimitPagination
 
     def get_queryset(self):
         return User.objects.filter(subscriptions__user=self.request.user)
