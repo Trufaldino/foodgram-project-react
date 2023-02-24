@@ -14,6 +14,7 @@ from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import Subscription, User
 
+from .filters import IngredientSearchFilter, RecipeFilter
 from .pagination import LimitedPagination
 from .permissions import IsAuthor, IsReadOnly
 from .serializers import (CreateRecipeSerializer, IngredientSerializer,
@@ -77,7 +78,7 @@ class OwnUserViewSet(UserViewSet):
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = [DjangoFilterBackend, ]
+    filter_backends = [IngredientSearchFilter, ]
     search_fields = ['^name']
 
 
@@ -91,6 +92,7 @@ class RecipeViewSet(ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = [IsAuthor | IsReadOnly]
     pagination_class = LimitedPagination
+    filter_class = RecipeFilter
     filter_backends = [DjangoFilterBackend, ]
 
     def get_serializer_class(self):

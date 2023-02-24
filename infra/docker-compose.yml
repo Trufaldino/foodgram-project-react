@@ -10,7 +10,7 @@ services:
       - ./.env
 
   backend:
-    image: truffaldino/foodgram-backend:latest
+    image: truffaldino/backend-foodgram:latest
     restart: always
     volumes:
       - static_value:/app/static/
