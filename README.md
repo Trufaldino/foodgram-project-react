@@ -1,14 +1,3 @@
-сервер - http://51.250.90.134/
-```
-email - admin@admin.com 
-password - admin
-```
-админка -http://51.250.90.134/admin/
-
-username - admin 
-password - admin
-
-
 ## Проект Foodgram
 
 ![workflow](https://github.com/Trufaldino/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
